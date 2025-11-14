@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>مسابقة الهدايا</title>
+<style>
+  body { font-family: Arial; text-align:center; padding:20px; background: linear-gradient(135deg,#74b9ff,#a29bfe,#fd79a8,#55efc4,#ffeaa7); background-size:400% 400%; animation: bgmove 12s ease infinite; }
+  @keyframes bgmove { 0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;} }
+  #intro { font-size:20px; margin-top:40px; animation: fadeIn 2s ease; }
+  #loginBox { display:block; animation: slideDown 0.8s ease; }
+  input { padding:12px; width:270px; margin:8px; border-radius:8px; border:1px solid #bbb; }
+  button { padding:12px 30px; cursor:pointer; border:none; background:#007bff; color:white; border-radius:8px; font-size:16px; }
+  button:hover { opacity:0.9; }
+  #loginCard, #shareOptions { background:white; width:330px; margin:auto; padding:25px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.15); }
+  #wheelBox { display:none; margin-top:30px; }
+  #wheelContainer { width:330px; height:330px; margin:auto; position:relative; }
+  #wheel { width:100%; height:100%; border-radius:50%; border:10px solid #444; transition:transform 4s cubic-bezier(.17,.67,.83,.67); }
+  #pointer { width:0; height:0; border-left:20px solid transparent; border-right:20px solid transparent; border-bottom:35px solid red; position:absolute; top:-10px; left:50%; transform:translateX(-50%); }
+  #resultBox { display:none; font-size:22px; margin-top:20px; }
+  #shareBox { display:none; font-size:18px; margin-top:20px; }
+  #shareOptions { display:none; text-align:center; }
+  .share-btn { padding:10px 20px; margin:5px; border:none; border-radius:8px; cursor:pointer; color:white; font-weight:bold; }
+  .telegram { background:#0088cc; }
+  .whatsapp { background:#25D366; }
+  .facebook { background:#3b5998; }
+  .twitter { background:#1DA1F2; }
+  .messenger { background:#0084FF; }
+  .instagram { background:#C13584; }
+  @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+  @keyframes slideDown { from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+
+<div id="intro">🎉 أهلاً بك! يرجى تسجيل الدخول للبدء!</div>
+
+<div id="loginBox">
+  <div id="loginCard">
+    <h3>تسجيل الدخول</h3>
+    <input type="email" id="email" placeholder="أدخل البريد الإلكتروني"><br>
+    <input type="text" id="password" placeholder="أدخل كلمة المرور"><br>
+    <button onclick="submitLogin()">تأكيد</button>
+
+    <div style="margin-top:15px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" width="35" style="margin-top:15px; cursor:pointer;" />
+    </div>
+  </div>
+</div>
+
+<div id="wheelBox">
+  <div id="wheelContainer">
+    <div id="pointer"></div>
+    <canvas id="wheel" width="330" height="330"></canvas>
+  </div>
+  <br>
+  <button onclick="spin()">تدوير العجلة</button>
+</div>
+
+<div id="resultBox">
+  <h3>🎁 نتيجتك:</h3>
+  <p id="resultText"></p>
+</div>
+
+<div id="shareBox">
+  <h3>شارك الرابط مع أصدقائك للحصول على جائزتك:</h3>
+  <button onclick="showShareOptions()">مشاركة الرابط</button>
+</div>
+
+<div id="shareOptions">
+  <h4>اختر التطبيق:</h4>
+  <button class="share-btn telegram" onclick="shareApp('telegram')">Telegram</button>
+  <button class="share-btn whatsapp" onclick="shareApp('whatsapp')">WhatsApp</button>
+  <button class="share-btn facebook" onclick="shareApp('facebook')">Facebook</button>
+  <button class="share-btn twitter" onclick="shareApp('twitter')">Twitter</button>
+  <button class="share-btn messenger" onclick="shareApp('messenger')">Messenger</button>
+  <button class="share-btn instagram" onclick="shareApp('instagram')">Instagram</button>
+</div>
+
+<script>
+let wheelCanvas = document.getElementById("wheel");
+let ctx = wheelCanvas.getContext("2d");
+let prizes = ["📱 هاتف","🚲 دراجة","✈️ رحلة لتركيا","🎧 سماعات","🎮 جهاز ألعاب","💻 لابتوب","🎁 حقيبة هدايا","🕶 نظارات شمسية","📷 كاميرا رقمية","🎟 تذاكر سينما"];
+let colors = ["#ff6b6b", "#4dabf7", "#51cf66", "#ffd43b", "#845ef7", "#fd79a8", "#00b894", "#fdcb6e", "#6c5ce7", "#00cec9"];
+let sliceAngle = 2 * Math.PI / prizes.length;
+let rotation = 0;
+
+function drawWheel() {
+  for (let i = 0; i < prizes.length; i++) {
+    ctx.beginPath();
+    ctx.fillStyle = colors[i];
+    ctx.moveTo(165,165);
+    ctx.arc(165,165,160, sliceAngle * i, sliceAngle * (i+1));
+    ctx.lineTo(165,165);
+    ctx.fill();
+    ctx.save();
+    ctx.translate(165,165);
+    ctx.rotate(sliceAngle * i + sliceAngle / 2);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "white";
+    ctx.font = "bold 16px Arial";
+    ctx.fillText(prizes[i], 70,10);
+    ctx.restore();
+  }
+}
+drawWheel();
+
+function validateEmail(email) {
+  let re = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+  return re.test(email);
+}
+
+function submitLogin() {
+  let email = document.getElementById('email').value;
+  let password = document.getElementById('password').value;
+  if(email.trim() === '' || password.trim() === ''){
+    alert('يرجى ملء جميع الحقول!');
+    return;
+  }
+  if(!validateEmail(email)){
+    alert('يرجى إدخال بريد إلكتروني صالح!');
+    return;
+  }
+  document.getElementById('loginBox').style.display='none';
+  document.getElementById('wheelBox').style.display='block';
+}
+
+function spin(){
+  let randomSpin = Math.floor(Math.random() * 360) + 1800;
+  rotation += randomSpin;
+  wheelCanvas.style.transform = `rotate(${rotation}deg)`;
+  setTimeout(()=>{
+    let index = Math.floor(((rotation % 360)/360) * prizes.length);
+    index = prizes.length - 1 - index;
+    if(index<0) index=0;
+    document.getElementById('resultText').textContent = prizes[index];
+    document.getElementById('resultBox').style.display='block';
+    document.getElementById('shareBox').style.display='block';
+  },4000);
+}
+
+function showShareOptions(){
+  document.getElementById('shareOptions').style.display='block';
+}
+
+function shareApp(app){
+  let link = encodeURIComponent('https://yourgithubpage.link');
+  let url = '';
+  switch(app){
+    case 'telegram': url=`https://t.me/share/url?url=${link}&text=جرب حظك في هذه المسابقة!`; break;
+    case 'whatsapp': url=`https://api.whatsapp.com/send?text=جرب حظك في هذه المسابقة! ${link}`; break;
+    case 'facebook': url=`https://www.facebook.com/sharer/sharer.php?u=${link}`; break;
+    case 'twitter': url=`https://twitter.com/intent/tweet?text=جرب حظك في هذه المسابقة!&url=${link}`; break;
+    case 'messenger': url=`fb-messenger://share?link=${link}`; break;
+    case 'instagram': alert('لا يمكن مشاركة رابط مباشر عبر Instagram، يمكن نسخ الرابط ومشاركته يدوياً'); return;
+  }
+  window.open(url,'_blank');
+}
+</script>
+
+</body>
+</html>
